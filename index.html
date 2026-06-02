@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thai Consonants - Mnemonic Match</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        #app-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            z-index: 10;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        #progress {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 1.5rem;
+        }
+        #hint-box {
+            font-size: 1.2rem;
+            background-color: #ecf0f1;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-left: 5px solid #3498db;
+            box-sizing: border-box;
+        }
+        .meaning-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e67e22;
+            margin-bottom: 0.5rem;
+        }
+        .hint-text {
+            color: #34495e;
+            font-style: italic;
+        }
+        #options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        button.option-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            border: 2px solid #bdc3c7;
+            background-color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+        button.option-btn:hover:not(:disabled) {
+            background-color: #e8f4fd;
+            border-color: #3498db;
+            transform: scale(1.02);
+        }
+        .thai-char {
+            font-size: 4rem;
+            font-family: 'Sarabun', sans-serif;
+            color: #2c3e50;
+            line-height: normal;
+            padding: 5px 0;
+        }
+        .thai-name {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
+        button.option-btn.correct {
+            background-color: #2ecc71;
+            border-color: #27ae60;
+        }
+        button.option-btn.correct .thai-char, 
+        button.option-btn.correct .thai-name {
+            color: white;
+        }
+        button.option-btn.wrong {
+            background-color: #e74c3c;
+            border-color: #c0392b;
+        }
+        button.option-btn.wrong .thai-char, 
+        button.option-btn.wrong .thai-name {
+            color: white;
+        }
+        #feedback {
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 30px;
+        }
+        .primary-btn {
+            margin-top: 1rem;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .primary-btn:hover {
+            background-color: #2980b9;
+        }
+        #next-btn {
+            display: none;
+        }
+
+        /* --- End Screen Styles --- */
+        #end-view {
+            display: none;
+        }
+        .scoreboard {
+            font-size: 2rem;
+            color: #27ae60;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+        #wrong-list {
+            text-align: left;
+            list-style-type: none;
+            padding: 0;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ecf0f1;
+            border-radius: 10px;
+        }
+        #wrong-list li {
+            background: #f9fbfd;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-left: 4px solid #e74c3c;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        /* --- Extra Small Mobile Tweaks --- */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            #app-container { padding: 1.5rem 1rem; }
+            h1 { font-size: 1.5rem; }
+            #progress { font-size: 1rem; margin-bottom: 1rem; }
+            #hint-box { padding: 1rem; margin-bottom: 1.5rem; min-height: 80px; }
+            .meaning-text { font-size: 1.2rem; }
+            .hint-text { font-size: 1rem; }
+            #options { gap: 10px; }
+            button.option-btn { padding: 1rem 0.5rem; }
+            .thai-char { font-size: 3rem; }
+            .thai-name { font-size: 0.95rem; }
+            #feedback { font-size: 1.1rem; margin-top: 1rem; }
+            #wrong-list li { font-size: 0.95rem; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    
+    <div id="game-view">
+        <h1>Consonant Match</h1>
+        <div id="progress">Score: <span id="score">0</span> / <span id="total-q">44</span></div>
+        
+        <div id="hint-box">
+            <div class="meaning-text" id="meaning-display"></div>
+            <div class="hint-text" id="hint-display"></div>
+        </div>
+        
+        <div id="options">
+            <button class="option-btn" onclick="checkAnswer(0)">
+                <span class="thai-char" id="char-0"></span>
+                <span class="thai-name" id="name-0"></span>
+            </button>
+            <button class="option-btn" onclick="checkAnswer(1)">
+                <span class="thai-char" id="char-1"></span>
+                <span class="thai-name" id="name-1"></span>
+            </button>
+            <button class="option-btn" onclick="checkAnswer(2)">
+                <span class="thai-char" id="char-2"></span>
+                <span class="thai-name" id="name-2"></span>
+            </button>
+            <button class="option-btn" onclick="checkAnswer(3)">
+                <span class="thai-char" id="char-3"></span>
+                <span class="thai-name" id="name-3"></span>
+            </button>
+        </div>
+
+        <div id="feedback"></div>
+        <button id="next-btn" class="primary-btn" onclick="loadNextQuestion()">Next Question</button>
+    </div>
+
+    <div id="end-view">
+        <h1>Round Complete!</h1>
+        <div class="scoreboard" id="final-score"></div>
+        
+        <div id="review-section" style="display:none;">
+            <h3>Incorrectly Answered Questions:</h3>
+            <ul id="wrong-list"></ul>
+            <button id="review-btn" class="primary-btn" onclick="startReviewRound()">Review Missed Questions</button>
+        </div>
+        
+        <div id="perfect-section" style="display:none;">
+            <p style="font-size: 1.2rem; margin: 2rem 0;">Perfect! You've mastered all the consonants in this set.</p>
+            <button class="primary-btn" onclick="location.reload()">Play Again from the Beginning</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const allConsonants = [
+        { char: 'ก', name: 'Gor Gài', meaning: 'Chicken', hint: 'looks like a chicken beak.' },
+        { char: 'ข', name: 'Kŏr Kài', meaning: 'Egg', hint: 'represents an egg. But instead it looks like a Condom! (Con sounds like Kŏr, doesn’t it?)' },
+        { char: 'ค', name: 'Kor Kwaay', meaning: 'Buffalo', hint: 'looks like a buffalo butt. The buffalo loves being outside.' },
+        { char: 'ง', name: 'Ngor Nguu', meaning: 'Snake', hint: 'looks like a snake raising his neck.' },
+        { char: 'จ', name: 'Jor Jaan', meaning: 'Dish', hint: 'looks like a hand of a waitress holding a plate' },
+        { char: 'ช', name: 'Chor Cháang', meaning: 'Elephant', hint: 'Think of a magical elephant hatching from an egg.' },
+        { char: 'ซ', name: 'Sor Sôh', meaning: 'Chain', hint: 'A magical elephant was captured and chained.' },
+        { char: 'ด', name: 'Dor Dèk', meaning: 'Kid', hint: 'Unlike a buffalo who loves being outdoors in the sun, a kit loves being in the house (look at his head tugging inside!).' },
+        { char: 'ต', name: 'DTor DTào', meaning: 'Turtle', hint: 'Like a kid, a turtle with a bumpy top loves hiding his head inside his shell.' },
+        { char: 'อ', name: 'or aàng', meaning: 'Sink', hint: 'The shape of this consonant looks like a sing with a faucet on top.' },
+        { char: 'บ', name: 'Bor Bai-Mái', meaning: 'Leaf', hint: 'The leaf has a wider base than an egg.' },
+        { char: 'ม', name: 'Mor Máa', meaning: 'Horse', hint: 'This consonant looks like a leaf, think of a race between a horse and a mouse. A horse is faster so let’s draw a leg in front.' },
+        { char: 'น', name: 'Nor Nŭu', meaning: 'Mouse', hint: 'This consonant looks like a leaf, think of a race between a horse and a mouse. A mouse is slower so let’s draw a tail at the rear.' },
+        { char: 'ป', name: 'BPor BPlaa', meaning: 'Fish', hint: 'Draw a rear long fin at the end of the leaf turning it into a fish.' },
+        { char: 'พ', name: 'Por Paan', meaning: 'Offering Tray', hint: 'Fold the base of the leaf to turn it into an offering tray.' },
+        { char: 'ย', name: 'Yor Yák', meaning: 'Giant', hint: 'A leaf can also turn into the face of a giant, move the head inside to make it look like a giant’s big eye then draw a smile.' },
+        { char: 'ท', name: 'Tor Tá-Hăan', meaning: 'Soldier', hint: 'The soldier consonant looks like a soldier crawling.' },
+        { char: 'ห', name: 'Hŏr Hèeb', meaning: 'Chest', hint: 'The chest consonant looks like a soldier carrying a chest on his back.' },
+        { char: 'ว', name: 'Wor Wăen', meaning: 'Ring', hint: 'The shape of this consonant looks like a ring on a finger.' },
+        { char: 'ร', name: 'Ror Ruuea', meaning: 'Boat', hint: 'Let’s draw a small sail above the ring turning this into a boat.' },
+        { char: 'ล', name: 'Lor Ling', meaning: 'Monkey', hint: 'The monkey consonant looks like a monkey swinging on a vine in a tree.' },
+        { char: 'ส', name: 'Sŏr Sŭuea', meaning: 'Tiger', hint: 'Think of a monkey being chased by a tiger. The tiger swipes its claws down on the monkey\'s head. Turning the monkey consonant into a tiger consonant.' },
+        { char: 'ถ', name: 'Tŏr Tŭng', meaning: 'Bag', hint: 'Think of the chicken consonant, then imagine fried chicken in a bag tied with a rubber band at the bottom (head insdie). Turning the chicken consonant into the bag consonant.' },
+        { char: 'ฟ', name: 'For Fan', meaning: 'Tooth', hint: 'Think back to childhood — some parents would tie a string to a baby tooth and yank it out.' },
+        { char: 'ผ', name: 'Pŏr Pûeng', meaning: 'Bee', hint: 'Shaped like a tray but head inside, sound also like a tray but with a valley tone.' },
+        { char: 'ฝ', name: 'Fŏr Făa', meaning: 'Lid', hint: 'Shaped like a tooth but head inside, sound also like a tooth but with a valley tone.' },
+        { char: 'ภ', name: 'Por Săm-Pao', meaning: 'Sailing Ship', hint: 'Shaped like a boat with larger sail.' },
+        { char: 'ฮ', name: 'Hor Nóg-Hûug', meaning: 'Owl', hint: 'Think of an owl in a sink/tub.' },
+        { char: 'ศ', name: 'Sŏr Săa-Laa', meaning: 'Pavillion', hint: 'Shaped like a buffalo with one line on top.' },
+        { char: 'ษ', name: 'Sŏr Ruue-Sĕe', meaning: 'Wiseman', hint: 'Shaped like a leaf with a belt. Think of a wiseman wearing clothes made of leaves.' },
+        { char: 'ฉ', name: 'Chŏr Chìng', meaning: 'Cymbals', hint: 'Think of a mouse wearing a cymbal as a hat.' },
+        { char: 'ธ', name: 'Tor Tong', meaning: 'Flag', hint: 'Think of a flag waving in the sky.' },
+        { char: 'ณ', name: 'Nor Nen', meaning: 'Novice Monk', hint: 'Shaped like a bag and a mouse.' },
+        { char: 'ญ', name: 'Yor Yiňg', meaning: 'Lady', hint: 'Shaped like a bag and a leg wearing a shoe.' },
+        { char: 'ฒ', name: 'Tor Pûu-Tâo', meaning: 'Old Man', hint: '(Rare) Think of an old horse runging slow like a turtle. That\'s it! Turtle + Horse = Old man!' },
+        { char: 'ฆ', name: 'Kor Rá-Kang', meaning: 'Bell', hint: '(Rare) Shaped like a horse with a bump!' },
+        { char: 'ฎ', name: 'Dor Chá-Daa', meaning: 'Lady Headdess', hint: '(Rare) Which consonant looks like a Chada?' },
+        { char: 'ฏ', name: 'DTor BPa-DTàg', meaning: 'Spear', hint: '(Rare) Looks like a Chada with more spiky base.' },
+        { char: 'ฐ', name: 'Tŏr Tăan', meaning: 'Base', hint: '(Rare) Which consonant has a separate base below?' },
+        { char: 'ฑ', name: 'Tor Mon-Toh', meaning: 'Mrs. Montoh', hint: '(Rare) A female soldier! So she looks like a soldier!' },
+        { char: 'ฬ', name: 'Lor Jù-Laa', meaning: 'Type of a kite', hint: '(Rare) Shaped like a tooth with a twisted tail!' },
+        { char: 'ฌ', name: 'Chor Cher', meaning: 'Tree', hint: '(Rare) A bag + Horse' },
+        { char: 'ฃ', name: 'Kŏr Kùuad', meaning: 'Bottle', hint: '(Obsolete) Shaped like an egg with a bump!' },
+        { char: 'ฅ', name: 'Kor Kon', meaning: 'Human', hint: '(Obsolete) Shaped like a buffalo with a bump!' }
+    ];
+
+    let score = 0;
+    let totalQuestionsThisRound = 0;
+    let gameQueue = [];
+    let wrongHistory = [];
+    let currentQuestion = null;
+    let currentOptions = [];
+    let correctIndex = -1;
+
+    // Helper: Shuffle array randomly
+    function shuffleArray(array) {
+        let shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+    // Initialize the main game following the strict order: Standard -> Rare -> Obsolete
+    function initGame() {
+        const standard = [];
+        const rare = [];
+        const obsolete = [];
+
+        // Categorize
+        allConsonants.forEach(c => {
+            if (c.hint.includes('(Obsolete)')) {
+                obsolete.push(c);
+            } else if (c.hint.includes('(Rare)')) {
+                rare.push(c);
+            } else {
+                standard.push(c);
+            }
+        });
+
+        // Build the queue by shuffling each section and combining them
+        gameQueue = [
+            ...shuffleArray(standard),
+            ...shuffleArray(rare),
+            ...shuffleArray(obsolete)
+        ];
+
+        startRound(gameQueue.length);
+    }
+
+    // Set up state for a new round (used by initGame and startReviewRound)
+    function startRound(questionCount) {
+        score = 0;
+        totalQuestionsThisRound = questionCount;
+        wrongHistory = [];
+        
+        document.getElementById('score').innerText = score;
+        document.getElementById('total-q').innerText = totalQuestionsThisRound;
+        
+        document.getElementById('end-view').style.display = 'none';
+        document.getElementById('game-view').style.display = 'block';
+
+        loadNextQuestion();
+    }
+
+    // Pull the next question from the queue
+    function loadNextQuestion() {
+        // Reset UI
+        document.getElementById('feedback').innerText = '';
+        document.getElementById('next-btn').style.display = 'none';
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(btn => {
+            btn.classList.remove('correct', 'wrong');
+            btn.disabled = false;
+        });
+
+        // Check if round is over
+        if (gameQueue.length === 0) {
+            showEndScreen();
+            return;
+        }
+
+        // Pop from the front of the queue
+        currentQuestion = gameQueue.shift();
+        
+        // Pick 3 random distractors from the FULL list (excluding the right answer)
+        let distractors = allConsonants.filter(c => c.char !== currentQuestion.char);
+        distractors = shuffleArray(distractors).slice(0, 3);
+        
+        // Combine and shuffle options
+        currentOptions = shuffleArray([currentQuestion, ...distractors]);
+        correctIndex = currentOptions.findIndex(c => c.char === currentQuestion.char);
+
+        // Update UI Text
+        document.getElementById('meaning-display').innerText = `Find: "${currentQuestion.meaning}"`;
+        document.getElementById('hint-display').innerText = `Hint: ${currentQuestion.hint}`;
+        
+        currentOptions.forEach((opt, index) => {
+            document.getElementById(`char-${index}`).innerText = opt.char;
+            document.getElementById(`name-${index}`).innerText = opt.name;
+        });
+    }
+
+    // Evaluate the user's click
+    function checkAnswer(selectedIndex) {
+        const buttons = document.querySelectorAll('.option-btn');
+        const feedback = document.getElementById('feedback');
+        
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (selectedIndex === correctIndex) {
+            score++;
+            document.getElementById('score').innerText = score;
+            buttons[selectedIndex].classList.add('correct');
+            feedback.innerText = "Correct! Great job."; 
+            feedback.style.color = "#27ae60";
+        } else {
+            // Log the mistake for the review screen
+            wrongHistory.push({
+                question: currentQuestion,
+                selected: currentOptions[selectedIndex]
+            });
+
+            buttons[selectedIndex].classList.add('wrong');
+            buttons[correctIndex].classList.add('correct');
+            
+            const correctAnswer = currentOptions[correctIndex];
+            feedback.innerText = `Incorrect. The correct answer is ${correctAnswer.char} (${correctAnswer.name}).`;
+            feedback.style.color = "#c0392b";
+        }
+
+        document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
+    // Transition to the End Screen
+    function showEndScreen() {
+        document.getElementById('game-view').style.display = 'none';
+        document.getElementById('end-view').style.display = 'block';
+        
+        document.getElementById('final-score').innerText = `${score} / ${totalQuestionsThisRound}`;
+        
+        const listContainer = document.getElementById('wrong-list');
+        listContainer.innerHTML = ''; // clear previous lists
+
+        if (wrongHistory.length > 0) {
+            document.getElementById('review-section').style.display = 'block';
+            document.getElementById('perfect-section').style.display = 'none';
+
+            wrongHistory.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${item.question.meaning}</strong> <br>
+                    <span style="font-size:0.9em; color:#7f8c8d;">${item.question.hint}</span><br>
+                    ❌ You chose: ${item.selected.char} (${item.selected.name})<br>
+                    ✅ Correct: <span style="color:#27ae60; font-weight:bold;">${item.question.char} (${item.question.name})</span>
+                `;
+                listContainer.appendChild(li);
+            });
+        } else {
+            document.getElementById('review-section').style.display = 'none';
+            document.getElementById('perfect-section').style.display = 'block';
+        }
+    }
+
+    // Start a new round using ONLY the questions that were missed
+    function startReviewRound() {
+        // Extract the questions from the history logs and shuffle them
+        gameQueue = shuffleArray(wrongHistory.map(item => item.question));
+        startRound(gameQueue.length);
+    }
+
+    // Start the game immediately on load
+    initGame();
+</script>
+
+</body>
+</html>

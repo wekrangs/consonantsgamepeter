@@ -81,7 +81,7 @@
             cursor: pointer;
             transition: all 0.2s;
             box-sizing: border-box;
-            position: relative; /* Essential for placing the class label absolute inside */
+            position: relative; 
         }
         button.option-btn:hover:not(:disabled) {
             background-color: #e8f4fd;
@@ -107,23 +107,39 @@
             line-height: normal;
             padding: 5px 0;
         }
+        .thai-name {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+            font-weight: bold;
+        }
         button.option-btn.correct {
             background-color: #2ecc71;
             border-color: #27ae60;
         }
         button.option-btn.correct .thai-char, 
-        button.option-btn.correct .thai-class {
+        button.option-btn.correct .thai-class,
+        button.option-btn.correct .thai-name {
             color: white;
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        button.option-btn.correct .thai-char,
+        button.option-btn.correct .thai-name {
+            background-color: transparent; /* Reset background for normal text */
         }
         button.option-btn.wrong {
             background-color: #e74c3c;
             border-color: #c0392b;
         }
         button.option-btn.wrong .thai-char, 
-        button.option-btn.wrong .thai-class {
+        button.option-btn.wrong .thai-class,
+        button.option-btn.wrong .thai-name {
             color: white;
             background-color: rgba(255, 255, 255, 0.2);
+        }
+        button.option-btn.wrong .thai-char,
+        button.option-btn.wrong .thai-name {
+            background-color: transparent; 
         }
         #feedback {
             margin-top: 1.5rem;
@@ -190,6 +206,7 @@
             #options { gap: 10px; }
             button.option-btn { padding: 1.5rem 0.5rem 0.5rem 0.5rem; }
             .thai-char { font-size: 3rem; }
+            .thai-name { font-size: 0.95rem; }
             #feedback { font-size: 1.1rem; margin-top: 1rem; }
             #wrong-list li { font-size: 0.95rem; padding: 10px; }
             .thai-class { font-size: 0.65rem; top: 5px; right: 5px; padding: 2px 6px; }
@@ -213,18 +230,22 @@
             <button class="option-btn" onclick="checkAnswer(0)">
                 <span class="thai-class" id="class-0"></span>
                 <span class="thai-char" id="char-0"></span>
+                <span class="thai-name" id="name-0"></span>
             </button>
             <button class="option-btn" onclick="checkAnswer(1)">
                 <span class="thai-class" id="class-1"></span>
                 <span class="thai-char" id="char-1"></span>
+                <span class="thai-name" id="name-1"></span>
             </button>
             <button class="option-btn" onclick="checkAnswer(2)">
                 <span class="thai-class" id="class-2"></span>
                 <span class="thai-char" id="char-2"></span>
+                <span class="thai-name" id="name-2"></span>
             </button>
             <button class="option-btn" onclick="checkAnswer(3)">
                 <span class="thai-class" id="class-3"></span>
                 <span class="thai-char" id="char-3"></span>
+                <span class="thai-name" id="name-3"></span>
             </button>
         </div>
 
@@ -306,7 +327,6 @@
     let currentOptions = [];
     let correctIndex = -1;
 
-    // Helper: Shuffle array randomly
     function shuffleArray(array) {
         let shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -316,13 +336,11 @@
         return shuffled;
     }
 
-    // Initialize the main game following the strict order: Standard -> Rare -> Obsolete
     function initGame() {
         const standard = [];
         const rare = [];
         const obsolete = [];
 
-        // Categorize based on the text hint markers
         allConsonants.forEach(c => {
             if (c.hint.includes('(Obsolete)')) {
                 obsolete.push(c);
@@ -333,7 +351,6 @@
             }
         });
 
-        // Build the queue by shuffling each section and combining them in requested order
         gameQueue = [
             ...shuffleArray(standard),
             ...shuffleArray(rare),
@@ -343,7 +360,6 @@
         startRound(gameQueue.length);
     }
 
-    // Set up state for a new round
     function startRound(questionCount) {
         score = 0;
         totalQuestionsThisRound = questionCount;
@@ -358,9 +374,7 @@
         loadNextQuestion();
     }
 
-    // Pull the next question from the queue
     function loadNextQuestion() {
-        // Reset UI
         document.getElementById('feedback').innerText = '';
         document.getElementById('next-btn').style.display = 'none';
         const buttons = document.querySelectorAll('.option-btn');
@@ -369,34 +383,29 @@
             btn.disabled = false;
         });
 
-        // Check if round is over
         if (gameQueue.length === 0) {
             showEndScreen();
             return;
         }
 
-        // Pop from the front of the queue
         currentQuestion = gameQueue.shift();
         
-        // Pick 3 random distractors from the FULL list (excluding the right answer)
         let distractors = allConsonants.filter(c => c.char !== currentQuestion.char);
         distractors = shuffleArray(distractors).slice(0, 3);
         
-        // Combine and shuffle options
         currentOptions = shuffleArray([currentQuestion, ...distractors]);
         correctIndex = currentOptions.findIndex(c => c.char === currentQuestion.char);
 
-        // Update UI Text
         document.getElementById('meaning-display').innerText = `Find: "${currentQuestion.meaning}"`;
         document.getElementById('hint-display').innerText = `Hint: ${currentQuestion.hint}`;
         
         currentOptions.forEach((opt, index) => {
             document.getElementById(`char-${index}`).innerText = opt.char;
             document.getElementById(`class-${index}`).innerText = opt.cls;
+            document.getElementById(`name-${index}`).innerText = opt.name;
         });
     }
 
-    // Evaluate the user's click
     function checkAnswer(selectedIndex) {
         const buttons = document.querySelectorAll('.option-btn');
         const feedback = document.getElementById('feedback');
@@ -410,7 +419,6 @@
             feedback.innerText = "Correct! Great job."; 
             feedback.style.color = "#27ae60";
         } else {
-            // Log the mistake for the review screen
             wrongHistory.push({
                 question: currentQuestion,
                 selected: currentOptions[selectedIndex]
@@ -427,7 +435,6 @@
         document.getElementById('next-btn').style.display = 'inline-block';
     }
 
-    // Transition to the End Screen
     function showEndScreen() {
         document.getElementById('game-view').style.display = 'none';
         document.getElementById('end-view').style.display = 'block';
@@ -435,7 +442,7 @@
         document.getElementById('final-score').innerText = `${score} / ${totalQuestionsThisRound}`;
         
         const listContainer = document.getElementById('wrong-list');
-        listContainer.innerHTML = ''; // clear previous lists
+        listContainer.innerHTML = ''; 
 
         if (wrongHistory.length > 0) {
             document.getElementById('review-section').style.display = 'block';
@@ -457,14 +464,11 @@
         }
     }
 
-    // Start a new round using ONLY the questions that were missed
     function startReviewRound() {
-        // Extract the questions from the history logs and shuffle them
         gameQueue = shuffleArray(wrongHistory.map(item => item.question));
         startRound(gameQueue.length);
     }
 
-    // Start the game immediately on load
     initGame();
 </script>
 

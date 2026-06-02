@@ -74,18 +74,31 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 1.5rem 1rem 1rem 1rem;
             border: 2px solid #bdc3c7;
             background-color: white;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
             box-sizing: border-box;
+            position: relative; /* Essential for placing the class label absolute inside */
         }
         button.option-btn:hover:not(:disabled) {
             background-color: #e8f4fd;
             border-color: #3498db;
             transform: scale(1.02);
+        }
+        .thai-class {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #7f8c8d;
+            background-color: #f1f2f6;
+            padding: 3px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.5px;
         }
         .thai-char {
             font-size: 4rem;
@@ -94,27 +107,23 @@
             line-height: normal;
             padding: 5px 0;
         }
-        .thai-name {
-            font-size: 1.1rem;
-            color: #7f8c8d;
-            margin-top: 0.5rem;
-            font-weight: bold;
-        }
         button.option-btn.correct {
             background-color: #2ecc71;
             border-color: #27ae60;
         }
         button.option-btn.correct .thai-char, 
-        button.option-btn.correct .thai-name {
+        button.option-btn.correct .thai-class {
             color: white;
+            background-color: rgba(255, 255, 255, 0.2);
         }
         button.option-btn.wrong {
             background-color: #e74c3c;
             border-color: #c0392b;
         }
         button.option-btn.wrong .thai-char, 
-        button.option-btn.wrong .thai-name {
+        button.option-btn.wrong .thai-class {
             color: white;
+            background-color: rgba(255, 255, 255, 0.2);
         }
         #feedback {
             margin-top: 1.5rem;
@@ -179,11 +188,11 @@
             .meaning-text { font-size: 1.2rem; }
             .hint-text { font-size: 1rem; }
             #options { gap: 10px; }
-            button.option-btn { padding: 1rem 0.5rem; }
+            button.option-btn { padding: 1.5rem 0.5rem 0.5rem 0.5rem; }
             .thai-char { font-size: 3rem; }
-            .thai-name { font-size: 0.95rem; }
             #feedback { font-size: 1.1rem; margin-top: 1rem; }
             #wrong-list li { font-size: 0.95rem; padding: 10px; }
+            .thai-class { font-size: 0.65rem; top: 5px; right: 5px; padding: 2px 6px; }
         }
     </style>
 </head>
@@ -202,20 +211,20 @@
         
         <div id="options">
             <button class="option-btn" onclick="checkAnswer(0)">
+                <span class="thai-class" id="class-0"></span>
                 <span class="thai-char" id="char-0"></span>
-                <span class="thai-name" id="name-0"></span>
             </button>
             <button class="option-btn" onclick="checkAnswer(1)">
+                <span class="thai-class" id="class-1"></span>
                 <span class="thai-char" id="char-1"></span>
-                <span class="thai-name" id="name-1"></span>
             </button>
             <button class="option-btn" onclick="checkAnswer(2)">
+                <span class="thai-class" id="class-2"></span>
                 <span class="thai-char" id="char-2"></span>
-                <span class="thai-name" id="name-2"></span>
             </button>
             <button class="option-btn" onclick="checkAnswer(3)">
+                <span class="thai-class" id="class-3"></span>
                 <span class="thai-char" id="char-3"></span>
-                <span class="thai-name" id="name-3"></span>
             </button>
         </div>
 
@@ -243,50 +252,50 @@
 
 <script>
     const allConsonants = [
-        { char: 'ก', name: 'Gor Gài', meaning: 'Chicken', hint: 'looks like a chicken beak.' },
-        { char: 'ข', name: 'Kŏr Kài', meaning: 'Egg', hint: 'represents an egg. But instead it looks like a Condom! (Con sounds like Kŏr, doesn’t it?)' },
-        { char: 'ค', name: 'Kor Kwaay', meaning: 'Buffalo', hint: 'looks like a buffalo butt. The buffalo loves being outside.' },
-        { char: 'ง', name: 'Ngor Nguu', meaning: 'Snake', hint: 'looks like a snake raising his neck.' },
-        { char: 'จ', name: 'Jor Jaan', meaning: 'Dish', hint: 'looks like a hand of a waitress holding a plate' },
-        { char: 'ช', name: 'Chor Cháang', meaning: 'Elephant', hint: 'Think of a magical elephant hatching from an egg.' },
-        { char: 'ซ', name: 'Sor Sôh', meaning: 'Chain', hint: 'A magical elephant was captured and chained.' },
-        { char: 'ด', name: 'Dor Dèk', meaning: 'Kid', hint: 'Unlike a buffalo who loves being outdoors in the sun, a kit loves being in the house (look at his head tugging inside!).' },
-        { char: 'ต', name: 'DTor DTào', meaning: 'Turtle', hint: 'Like a kid, a turtle with a bumpy top loves hiding his head inside his shell.' },
-        { char: 'อ', name: 'or aàng', meaning: 'Sink', hint: 'The shape of this consonant looks like a sing with a faucet on top.' },
-        { char: 'บ', name: 'Bor Bai-Mái', meaning: 'Leaf', hint: 'The leaf has a wider base than an egg.' },
-        { char: 'ม', name: 'Mor Máa', meaning: 'Horse', hint: 'This consonant looks like a leaf, think of a race between a horse and a mouse. A horse is faster so let’s draw a leg in front.' },
-        { char: 'น', name: 'Nor Nŭu', meaning: 'Mouse', hint: 'This consonant looks like a leaf, think of a race between a horse and a mouse. A mouse is slower so let’s draw a tail at the rear.' },
-        { char: 'ป', name: 'BPor BPlaa', meaning: 'Fish', hint: 'Draw a rear long fin at the end of the leaf turning it into a fish.' },
-        { char: 'พ', name: 'Por Paan', meaning: 'Offering Tray', hint: 'Fold the base of the leaf to turn it into an offering tray.' },
-        { char: 'ย', name: 'Yor Yák', meaning: 'Giant', hint: 'A leaf can also turn into the face of a giant, move the head inside to make it look like a giant’s big eye then draw a smile.' },
-        { char: 'ท', name: 'Tor Tá-Hăan', meaning: 'Soldier', hint: 'The soldier consonant looks like a soldier crawling.' },
-        { char: 'ห', name: 'Hŏr Hèeb', meaning: 'Chest', hint: 'The chest consonant looks like a soldier carrying a chest on his back.' },
-        { char: 'ว', name: 'Wor Wăen', meaning: 'Ring', hint: 'The shape of this consonant looks like a ring on a finger.' },
-        { char: 'ร', name: 'Ror Ruuea', meaning: 'Boat', hint: 'Let’s draw a small sail above the ring turning this into a boat.' },
-        { char: 'ล', name: 'Lor Ling', meaning: 'Monkey', hint: 'The monkey consonant looks like a monkey swinging on a vine in a tree.' },
-        { char: 'ส', name: 'Sŏr Sŭuea', meaning: 'Tiger', hint: 'Think of a monkey being chased by a tiger. The tiger swipes its claws down on the monkey\'s head. Turning the monkey consonant into a tiger consonant.' },
-        { char: 'ถ', name: 'Tŏr Tŭng', meaning: 'Bag', hint: 'Think of the chicken consonant, then imagine fried chicken in a bag tied with a rubber band at the bottom (head insdie). Turning the chicken consonant into the bag consonant.' },
-        { char: 'ฟ', name: 'For Fan', meaning: 'Tooth', hint: 'Think back to childhood — some parents would tie a string to a baby tooth and yank it out.' },
-        { char: 'ผ', name: 'Pŏr Pûeng', meaning: 'Bee', hint: 'Shaped like a tray but head inside, sound also like a tray but with a valley tone.' },
-        { char: 'ฝ', name: 'Fŏr Făa', meaning: 'Lid', hint: 'Shaped like a tooth but head inside, sound also like a tooth but with a valley tone.' },
-        { char: 'ภ', name: 'Por Săm-Pao', meaning: 'Sailing Ship', hint: 'Shaped like a boat with larger sail.' },
-        { char: 'ฮ', name: 'Hor Nóg-Hûug', meaning: 'Owl', hint: 'Think of an owl in a sink/tub.' },
-        { char: 'ศ', name: 'Sŏr Săa-Laa', meaning: 'Pavillion', hint: 'Shaped like a buffalo with one line on top.' },
-        { char: 'ษ', name: 'Sŏr Ruue-Sĕe', meaning: 'Wiseman', hint: 'Shaped like a leaf with a belt. Think of a wiseman wearing clothes made of leaves.' },
-        { char: 'ฉ', name: 'Chŏr Chìng', meaning: 'Cymbals', hint: 'Think of a mouse wearing a cymbal as a hat.' },
-        { char: 'ธ', name: 'Tor Tong', meaning: 'Flag', hint: 'Think of a flag waving in the sky.' },
-        { char: 'ณ', name: 'Nor Nen', meaning: 'Novice Monk', hint: 'Shaped like a bag and a mouse.' },
-        { char: 'ญ', name: 'Yor Yiňg', meaning: 'Lady', hint: 'Shaped like a bag and a leg wearing a shoe.' },
-        { char: 'ฒ', name: 'Tor Pûu-Tâo', meaning: 'Old Man', hint: '(Rare) Think of an old horse runging slow like a turtle. That\'s it! Turtle + Horse = Old man!' },
-        { char: 'ฆ', name: 'Kor Rá-Kang', meaning: 'Bell', hint: '(Rare) Shaped like a horse with a bump!' },
-        { char: 'ฎ', name: 'Dor Chá-Daa', meaning: 'Lady Headdess', hint: '(Rare) Which consonant looks like a Chada?' },
-        { char: 'ฏ', name: 'DTor BPa-DTàg', meaning: 'Spear', hint: '(Rare) Looks like a Chada with more spiky base.' },
-        { char: 'ฐ', name: 'Tŏr Tăan', meaning: 'Base', hint: '(Rare) Which consonant has a separate base below?' },
-        { char: 'ฑ', name: 'Tor Mon-Toh', meaning: 'Mrs. Montoh', hint: '(Rare) A female soldier! So she looks like a soldier!' },
-        { char: 'ฬ', name: 'Lor Jù-Laa', meaning: 'Type of a kite', hint: '(Rare) Shaped like a tooth with a twisted tail!' },
-        { char: 'ฌ', name: 'Chor Cher', meaning: 'Tree', hint: '(Rare) A bag + Horse' },
-        { char: 'ฃ', name: 'Kŏr Kùuad', meaning: 'Bottle', hint: '(Obsolete) Shaped like an egg with a bump!' },
-        { char: 'ฅ', name: 'Kor Kon', meaning: 'Human', hint: '(Obsolete) Shaped like a buffalo with a bump!' }
+        { char: 'ก', cls: 'MID', name: 'Gor Gài', meaning: 'Chicken', hint: 'Looks like a chicken\'s beak.' },
+        { char: 'ข', cls: 'HIGH', name: 'Kŏr Kài', meaning: 'Egg', hint: 'Represents an egg, but instead, it looks like a condom! (\'Con\' sounds like \'Kŏr\', doesn’t it?)' },
+        { char: 'ค', cls: 'LOW', name: 'Kor Kwaay', meaning: 'Buffalo', hint: 'Looks like a buffalo\'s butt. The buffalo loves being outside.' },
+        { char: 'ง', cls: 'LOW', name: 'Ngor Nguu', meaning: 'Snake', hint: 'Looks like a snake raising its neck.' },
+        { char: 'จ', cls: 'MID', name: 'Jor Jaan', meaning: 'Dish', hint: 'Looks like the hand of a waitress holding a plate.' },
+        { char: 'ช', cls: 'LOW', name: 'Chor Cháang', meaning: 'Elephant', hint: 'Think of a magical elephant hatching from an egg.' },
+        { char: 'ซ', cls: 'LOW', name: 'Sor Sôh', meaning: 'Chain', hint: 'A magical elephant was captured and chained.' },
+        { char: 'ด', cls: 'MID', name: 'Dor Dèk', meaning: 'Kid', hint: 'Unlike a buffalo that loves being outdoors in the sun, a kid loves being in the house (look at his head tucked inside!).' },
+        { char: 'ต', cls: 'MID', name: 'DTor DTào', meaning: 'Turtle', hint: 'Like a kid, a turtle with a bumpy top loves hiding its head inside its shell.' },
+        { char: 'อ', cls: 'MID', name: 'or aàng', meaning: 'Sink', hint: 'The shape of this consonant looks like a sink with a faucet on top.' },
+        { char: 'บ', cls: 'MID', name: 'Bor Bai-Mái', meaning: 'Leaf', hint: 'The leaf has a wider base than an egg.' },
+        { char: 'ม', cls: 'LOW', name: 'Mor Máa', meaning: 'Horse', hint: 'This consonant looks like a leaf. Think of a race between a horse and a mouse; a horse is faster, so let’s draw a leg in front.' },
+        { char: 'น', cls: 'LOW', name: 'Nor Nŭu', meaning: 'Mouse', hint: 'This consonant looks like a leaf. Think of a race between a horse and a mouse; a mouse is slower, so let’s draw a tail at the rear.' },
+        { char: 'ป', cls: 'MID', name: 'BPor BPlaa', meaning: 'Fish', hint: 'Draw a long rear fin at the end of the leaf, turning it into a fish.' },
+        { char: 'พ', cls: 'LOW', name: 'Por Paan', meaning: 'Offering Tray', hint: 'Fold the base of the leaf to turn it into an offering tray.' },
+        { char: 'ย', cls: 'LOW', name: 'Yor Yák', meaning: 'Giant', hint: 'A leaf can also turn into the face of a giant. Move the head inside to make it look like a giant’s big eye, then draw a smile.' },
+        { char: 'ท', cls: 'LOW', name: 'Tor Tá-Hăan', meaning: 'Soldier', hint: 'The soldier consonant looks like a soldier crawling.' },
+        { char: 'ห', cls: 'HIGH', name: 'Hŏr Hèeb', meaning: 'Chest', hint: 'The chest consonant looks like a soldier carrying a chest on his back.' },
+        { char: 'ว', cls: 'LOW', name: 'Wor Wăen', meaning: 'Ring', hint: 'The shape of this consonant looks like a ring on a finger.' },
+        { char: 'ร', cls: 'LOW', name: 'Ror Ruuea', meaning: 'Boat', hint: 'Let’s draw a small sail above the ring, turning this into a boat.' },
+        { char: 'ล', cls: 'LOW', name: 'Lor Ling', meaning: 'Monkey', hint: 'The monkey consonant looks like a monkey swinging on a vine in a tree.' },
+        { char: 'ส', cls: 'HIGH', name: 'Sŏr Sŭuea', meaning: 'Tiger', hint: 'Think of a monkey being chased by a tiger. The tiger swipes its claws down on the monkey\'s head, turning the monkey consonant into a tiger consonant.' },
+        { char: 'ถ', cls: 'HIGH', name: 'Tŏr Tŭng', meaning: 'Bag', hint: 'Think of the chicken consonant, then imagine fried chicken in a bag tied with a rubber band at the bottom (head inside), turning the chicken consonant into the bag consonant.' },
+        { char: 'ฟ', cls: 'LOW', name: 'For Fan', meaning: 'Tooth', hint: 'Think back to childhood — some parents would tie a string to a baby tooth and yank it out.' },
+        { char: 'ผ', cls: 'HIGH', name: 'Pŏr Pûeng', meaning: 'Bee', hint: 'Shaped like a tray but with the head inside; it also sounds like a tray but with a valley tone.' },
+        { char: 'ฝ', cls: 'HIGH', name: 'Fŏr Făa', meaning: 'Lid', hint: 'Shaped like a tooth but with the head inside; it also sounds like a tooth but with a valley tone.' },
+        { char: 'ภ', cls: 'LOW', name: 'Por Săm-Pao', meaning: 'Sailing Ship', hint: 'Shaped like a boat with a larger sail.' },
+        { char: 'ฮ', cls: 'LOW', name: 'Hor Nóg-Hûug', meaning: 'Owl', hint: 'Think of an owl in a sink/tub.' },
+        { char: 'ศ', cls: 'HIGH', name: 'Sŏr Săa-Laa', meaning: 'Pavillion', hint: 'Shaped like a buffalo with one line on top.' },
+        { char: 'ษ', cls: 'HIGH', name: 'Sŏr Ruue-Sĕe', meaning: 'Wiseman', hint: 'Shaped like a leaf with a belt. Think of a wise man wearing clothes made of leaves.' },
+        { char: 'ฉ', cls: 'HIGH', name: 'Chŏr Chìng', meaning: 'Cymbals', hint: 'Think of a mouse wearing a cymbal as a hat.' },
+        { char: 'ธ', cls: 'LOW', name: 'Tor Tong', meaning: 'Flag', hint: 'Think of a flag waving in the sky.' },
+        { char: 'ณ', cls: 'LOW', name: 'Nor Nen', meaning: 'Novice Monk', hint: 'Shaped like a bag and a mouse.' },
+        { char: 'ญ', cls: 'LOW', name: 'Yor Yiňg', meaning: 'Lady', hint: 'Shaped like a bag and a leg wearing a shoe.' },
+        { char: 'ฒ', cls: 'LOW', name: 'Tor Pûu-Tâo', meaning: 'Old Man', hint: '(Rare) Think of an old horse running slowly like a turtle. That\'s it! Turtle + Horse = Old man!' },
+        { char: 'ฆ', cls: 'LOW', name: 'Kor Rá-Kang', meaning: 'Bell', hint: '(Rare) Shaped like a horse with a bump!' },
+        { char: 'ฎ', cls: 'MID', name: 'Dor Chá-Daa', meaning: 'Lady Headdess', hint: '(Rare) Which consonant looks like a Chada?' },
+        { char: 'ฏ', cls: 'MID', name: 'DTor BPa-DTàg', meaning: 'Spear', hint: '(Rare) Looks like a Chada with a spikier base.' },
+        { char: 'ฐ', cls: 'HIGH', name: 'Tŏr Tăan', meaning: 'Base', hint: '(Rare) Which consonant has a separate base below?' },
+        { char: 'ฑ', cls: 'LOW', name: 'Tor Mon-Toh', meaning: 'Mrs. Montoh', hint: '(Rare) A female soldier! So she looks like a soldier!' },
+        { char: 'ฬ', cls: 'LOW', name: 'Lor Jù-Laa', meaning: 'Type of a kite', hint: '(Rare) Shaped like a tooth with a twisted tail!' },
+        { char: 'ฌ', cls: 'LOW', name: 'Chor Cher', meaning: 'Tree', hint: '(Rare) A bag + horse.' },
+        { char: 'ฃ', cls: 'HIGH', name: 'Kŏr Kùuad', meaning: 'Bottle', hint: '(Obsolete) Shaped like an egg with a bump!' },
+        { char: 'ฅ', cls: 'LOW', name: 'Kor Kon', meaning: 'Human', hint: '(Obsolete) Shaped like a buffalo with a bump!' }
     ];
 
     let score = 0;
@@ -313,7 +322,7 @@
         const rare = [];
         const obsolete = [];
 
-        // Categorize
+        // Categorize based on the text hint markers
         allConsonants.forEach(c => {
             if (c.hint.includes('(Obsolete)')) {
                 obsolete.push(c);
@@ -324,7 +333,7 @@
             }
         });
 
-        // Build the queue by shuffling each section and combining them
+        // Build the queue by shuffling each section and combining them in requested order
         gameQueue = [
             ...shuffleArray(standard),
             ...shuffleArray(rare),
@@ -334,7 +343,7 @@
         startRound(gameQueue.length);
     }
 
-    // Set up state for a new round (used by initGame and startReviewRound)
+    // Set up state for a new round
     function startRound(questionCount) {
         score = 0;
         totalQuestionsThisRound = questionCount;
@@ -383,7 +392,7 @@
         
         currentOptions.forEach((opt, index) => {
             document.getElementById(`char-${index}`).innerText = opt.char;
-            document.getElementById(`name-${index}`).innerText = opt.name;
+            document.getElementById(`class-${index}`).innerText = opt.cls;
         });
     }
 
@@ -435,8 +444,8 @@
             wrongHistory.forEach(item => {
                 const li = document.createElement('li');
                 li.innerHTML = `
-                    <strong>${item.question.meaning}</strong> <br>
-                    <span style="font-size:0.9em; color:#7f8c8d;">${item.question.hint}</span><br>
+                    <strong>Find: ${item.question.meaning}</strong> <br>
+                    <span style="font-size:0.9em; color:#7f8c8d;">Hint: ${item.question.hint}</span><br>
                     ❌ You chose: ${item.selected.char} (${item.selected.name})<br>
                     ✅ Correct: <span style="color:#27ae60; font-weight:bold;">${item.question.char} (${item.question.name})</span>
                 `;
